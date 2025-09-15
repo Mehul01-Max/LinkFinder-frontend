@@ -18,14 +18,16 @@ import {
 import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
+  name: z.string(),
   email: z.string(),
   password: z.string(),
 });
 
-export default function SignIn() {
+export default function SignUp() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
@@ -34,17 +36,30 @@ export default function SignIn() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const base = process.env.NEXT_PUBLIC_BACKEND_URL;
-      const res = await axios.post(`${base}/api/auth/signin`, values);
-      localStorage.setItem("token", `Bearer ${res.data.token}`);
+      const res = await axios.post(`${base}/api/auth/signup`, values);
+      localStorage.setItem("token", `Authorization ${res.data.token}`);
       console.log("Response:", res.data);
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
-      console.error("Sign-in error:", err);
+      console.error("Sign-up error:", err);
     }
   };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>name</FormLabel>
+              <FormControl>
+                <Input placeholder="John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
@@ -71,9 +86,10 @@ export default function SignIn() {
             </FormItem>
           )}
         />
+
         <div className="flex flex-col gap-2">
           <Button type="submit">Submit</Button>
-          <Link href="/signup">create account?</Link>
+          <Link href="/">existing user?</Link>
         </div>
       </form>
     </Form>
